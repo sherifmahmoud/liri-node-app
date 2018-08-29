@@ -2,28 +2,31 @@ require("dotenv").config();
 var moment = require('moment');
 var keys = require('./keys');
 var Spotify = require('node-spotify-api');
-//var spotify = new Spotify(keys.spotify);
 var beautify = require("json-beautify");
+var request = require('request');
 
 //read command line arguments
 var args = process.argv;
 args.shift();//remove the path to node from the argument list
 args.shift();//remove the path to liri.js from the argument list
 var command = args[0];
+
 args.shift();//remove the command from the argument list
+var argument = args.join(' ');
 //according to the command call the suitable function
+//now args are just the arguments we care about without node and the liri.js file
 switch (command) {
     case 'concert-this':
-        concertThis(args);
+        concertThis(argument);
         break;
     case 'spotify-this-song':
-        spotifyThisSong(args);
+        spotifyThisSong(argument);
         break;
     case 'movie-this':
-        movieThis(args);
+        movieThis(argument);
         break;
     case 'do-what-it-says':
-        doWhatItSays(args);
+        doWhatItSays(argument);
         break;
     default:
         reportUnrecognizedCommand();
@@ -32,19 +35,8 @@ switch (command) {
 function concertThis(args) {
     console.log('Waiting for application ID from bandsintown.com.....');
 }
-function spotifyThisSong(args) {
-    var track = '';
-    if (args.length === 1) {
-        track = args[0];
-    }//end if (args.length === 1)
-    else if (args.length === 0) {
-        track = 'The Sign';
-    }//end else if (args.length === 0)
-    else {
-        console.log("You can't specify more than one song name!!!");
-        return;
-    }//end else
-
+function spotifyThisSong(track) {
+    console.log("Inside spotifyThisSong() Track: " + track);
     var spotify = new Spotify(keys.spotify);
     spotify.search({ type: 'track', query: track }, function (err, data) {
         if (err) {
@@ -55,6 +47,7 @@ function spotifyThisSong(args) {
         tracks.forEach(outputTrackInfo);
     });
 }
+
 function outputTrackInfo(track, index) {
     console.log(`Track ${index + 1} =====================================================================`);
     var artists = track.album.artists;
@@ -81,7 +74,29 @@ function outputTrackInfo(track, index) {
     console.log(`Album: ${albumName}`);
 
 }
-function movieThis(args) {
+
+function movieThis(movieName) {
+    console.log("Inside movieThis() Movie: " + movieName);
+    //prepare url
+    var url = `http://www.omdbapi.com/?apikey=${keys.omdb.key}&t=${movieName}&type=movie&r=json`;
+    //send request and handle response
+    request(url, function (error, response, body) {
+        body = JSON.parse(body);
+        if (!error) {
+            console.log(`*Title: ${body.Title}`);
+            console.log(`*Year: ${body.Year}`);
+            console.log(`*IMDB Rating: ${body.imdbRating}`);
+            console.log(`*Rotten Tomatoes Rating:`);
+            console.log(`Country: ${body.Country}`);
+            console.log(`Language: ${body.Language}`);
+            console.log(`Plot: ${body.Plot}`);
+            console.log(`Actors: ${body.Actors}`);
+        } else {
+            console.log('error:', error); // Print the error if one occurred  
+        }
+
+
+    });
 
 }
 function doWhatItSays(args) {
