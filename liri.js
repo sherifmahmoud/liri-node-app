@@ -15,23 +15,27 @@ var command = args[0];
 args.shift();//remove the command from the argument list
 //take the rest of the arguments and put them in one string as a potential multi-word argument
 var argument = args.join(' ');
-//according to the command call the suitable function
-//now args are just the arguments we care about without node and the liri.js file
-switch (command) {
-    case 'concert-this':
-        concertThis(argument);
-        break;
-    case 'spotify-this-song':
-        spotifyThisSong(argument);
-        break;
-    case 'movie-this':
-        movieThis(argument);
-        break;
-    case 'do-what-it-says':
-        doWhatItSays();
-        break;
-    default:
-        reportUnrecognizedCommand();
+
+executeCommand(command, argument);
+
+function executeCommand(command, argument) {
+    //according to the command call the suitable function
+    switch (command) {
+        case 'concert-this':
+            concertThis(argument);
+            break;
+        case 'spotify-this-song':
+            spotifyThisSong(argument);
+            break;
+        case 'movie-this':
+            movieThis(argument);
+            break;
+        case 'do-what-it-says':
+            doWhatItSays();
+            break;
+        default:
+            reportUnrecognizedCommand();
+    }
 }
 
 function concertThis(artist) {
@@ -126,7 +130,14 @@ function movieThis(movieName) {
 
 }
 function doWhatItSays() {
-
+    //read the file random.txt line by line
+    fs.readFileSync('random.txt').toString().split('\n').forEach(function (line) {
+        console.log(line);
+        var parts = line.split(',');
+        var command = parts[0];
+        var argument = parts[1].slice(1, -1);//remove the qoutation marks from around the argument
+        executeCommand(command, argument);
+    });
 }
 function reportUnrecognizedCommand() {
     console.log("Unrecognized Command!!!!");
