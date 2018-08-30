@@ -60,6 +60,9 @@ function outputEventInfo(event, index) {
 
 function spotifyThisSong(track) {
     var spotify = new Spotify(keys.spotify);
+    if (!track) {
+        track = 'The Sign';
+    }
     spotify.search({ type: 'track', query: track }, function (err, data) {
         if (err) {
             return console.log('Error occurred: ' + err);
@@ -71,7 +74,7 @@ function spotifyThisSong(track) {
 }
 
 function outputTrackInfo(track, index) {
-    console.log(`Track ${index + 1} =====================================================================`);
+    console.log(`Track (${index + 1}) =====================================================================`);
     var artists = track.album.artists;
     artists_string = '';//a string containing artists separated by comma if more than one
     if (artists.length > 1) {
@@ -94,7 +97,6 @@ function outputTrackInfo(track, index) {
         albumName = album.name;
     }
     console.log(`Album: ${albumName}`);
-
 }
 
 function movieThis(movieName) {
@@ -107,14 +109,14 @@ function movieThis(movieName) {
     request(url, function (error, response, body) {
         movie = JSON.parse(body);
         if (!error) {
-            console.log(`*Title: ${movie.Title}`);
-            console.log(`*Year: ${movie.Year}`);
-            console.log(`*IMDB Rating: ${movie.imdbRating}`);
-            console.log(`*Rotten Tomatoes Rating:`);
-            console.log(`Country: ${movie.Country}`);
-            console.log(`Language: ${movie.Language}`);
-            console.log(`Plot: ${movie.Plot}`);
-            console.log(`Actors: ${movie.Actors}`);
+            console.log(`* Title: ${movie.Title}`);
+            console.log(`* Year: ${movie.Year}`);
+            console.log(`* IMDB Rating: ${movie.imdbRating}`);
+            console.log(`* Rotten Tomatoes Rating:`);
+            console.log(`* Country: ${movie.Country}`);
+            console.log(`* Language: ${movie.Language}`);
+            console.log(`* Plot: ${movie.Plot}`);
+            console.log(`* Actors: ${movie.Actors}`);
         } else {
             console.log('error:', error); // Print the error if one occurred  
         }
