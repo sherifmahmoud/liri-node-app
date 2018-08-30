@@ -4,6 +4,7 @@ var keys = require('./keys');
 var Spotify = require('node-spotify-api');
 var beautify = require("json-beautify");
 var request = require('request');
+var fs = require('fs');
 
 //read command line arguments
 var args = process.argv;
@@ -12,6 +13,7 @@ args.shift();//remove the path to liri.js from the argument list
 var command = args[0];
 
 args.shift();//remove the command from the argument list
+//take the rest of the arguments and put them in one string as a potential multi-word argument
 var argument = args.join(' ');
 //according to the command call the suitable function
 //now args are just the arguments we care about without node and the liri.js file
@@ -26,17 +28,37 @@ switch (command) {
         movieThis(argument);
         break;
     case 'do-what-it-says':
-        doWhatItSays(argument);
+        doWhatItSays();
         break;
     default:
         reportUnrecognizedCommand();
 }
 
-function concertThis(args) {
-    console.log('Waiting for application ID from bandsintown.com.....');
+function concertThis(artist) {
+    var url = `https://rest.bandsintown.com/artists/${artist}/events?app_id=codingbootcamp`;
+
+    request(url, function (error, response, body) {
+        events = JSON.parse(body);
+
+        if (!error) {
+            console.log(`Found ${events.length} events`);
+            events.forEach(outputEventInfo);
+        } else {
+            console.log('error:', error); // Print the error if one occurred  
+        }
+    });
 }
+function outputEventInfo(event, index) {
+    console.log(`Event (${index + 1})`);
+    console.log(`Name of the venue: ${event.venue.name}`);
+    console.log(`Venue location: ${event.venue.city}, ${event.venue.region}, ${event.venue.country}`);
+    var date = moment(event.datetime, 'YYYY-MM-DDTHH:mm:ss').format('MM/DD/YYYY');
+    console.log(`Date: ${date}`);
+    console.log('===================================================================================');
+
+}
+
 function spotifyThisSong(track) {
-    console.log("Inside spotifyThisSong() Track: " + track);
     var spotify = new Spotify(keys.spotify);
     spotify.search({ type: 'track', query: track }, function (err, data) {
         if (err) {
@@ -51,17 +73,17 @@ function spotifyThisSong(track) {
 function outputTrackInfo(track, index) {
     console.log(`Track ${index + 1} =====================================================================`);
     var artists = track.album.artists;
-    artists_text = '';//a string containing artists separated by comma if more than one
+    artists_string = '';//a string containing artists separated by comma if more than one
     if (artists.length > 1) {
-        artists_text = artists[0].name;//start with the first artist
+        artists_string = artists[0].name;//start with the first artist
         for (var i = 1; i < artists.length; i++) {
-            artists_text += ', '; //add a comma
-            artists_text += artists[i].name;
+            artists_string += ', '; //add a comma
+            artists_string += artists[i].name;
         }
     } else {
-        artists_text = artists[0].name;
+        artists_string = artists[0].name;
     }
-    console.log(`Artists: ${artists_text}`);
+    console.log(`Artists: ${artists_string}`);
     console.log(`Song Name: "${track.name}"`);
     console.log(`Preview Link: ${track.preview_url}`);
     var album = track.album;
@@ -76,21 +98,23 @@ function outputTrackInfo(track, index) {
 }
 
 function movieThis(movieName) {
-    console.log("Inside movieThis() Movie: " + movieName);
+    if (!movieName) {
+        movieName = 'Mr. Nobody';
+    }
     //prepare url
-    var url = `http://www.omdbapi.com/?apikey=${keys.omdb.key}&t=${movieName}&type=movie&r=json`;
+    var url = `http://www.omdbapi.com/?apikey=trilogy&t=${movieName}&type=movie&r=json`;
     //send request and handle response
     request(url, function (error, response, body) {
-        body = JSON.parse(body);
+        movie = JSON.parse(body);
         if (!error) {
-            console.log(`*Title: ${body.Title}`);
-            console.log(`*Year: ${body.Year}`);
-            console.log(`*IMDB Rating: ${body.imdbRating}`);
+            console.log(`*Title: ${movie.Title}`);
+            console.log(`*Year: ${movie.Year}`);
+            console.log(`*IMDB Rating: ${movie.imdbRating}`);
             console.log(`*Rotten Tomatoes Rating:`);
-            console.log(`Country: ${body.Country}`);
-            console.log(`Language: ${body.Language}`);
-            console.log(`Plot: ${body.Plot}`);
-            console.log(`Actors: ${body.Actors}`);
+            console.log(`Country: ${movie.Country}`);
+            console.log(`Language: ${movie.Language}`);
+            console.log(`Plot: ${movie.Plot}`);
+            console.log(`Actors: ${movie.Actors}`);
         } else {
             console.log('error:', error); // Print the error if one occurred  
         }
@@ -99,10 +123,7 @@ function movieThis(movieName) {
     });
 
 }
-function doWhatItSays(args) {
-
-}
-function doWhatItSays(args) {
+function doWhatItSays() {
 
 }
 function reportUnrecognizedCommand() {
