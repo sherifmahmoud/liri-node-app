@@ -52,6 +52,7 @@ function concertThis(artist) {
         }
     });
 }
+
 function outputEventInfo(event, index) {
     console.log(`Event (${index + 1})`);
     console.log(`Name of the venue: ${event.venue.name}`);
@@ -62,12 +63,12 @@ function outputEventInfo(event, index) {
 
 }
 
-function spotifyThisSong(track) {
+function spotifyThisSong(song) {
     var spotify = new Spotify(keys.spotify);
-    if (!track) {
-        track = 'The Sign';
+    if (!song) {
+        song = 'The Sign';
     }
-    spotify.search({ type: 'track', query: track }, function (err, data) {
+    spotify.search({ type: 'track', query: song }, function (err, data) {
         if (err) {
             return console.log('Error occurred: ' + err);
         }
@@ -124,11 +125,9 @@ function movieThis(movieName) {
         } else {
             console.log('error:', error); // Print the error if one occurred  
         }
-
-
     });
-
 }
+
 function doWhatItSays() {
     //read the file random.txt line by line
     fs.readFileSync('random.txt').toString().split('\n').forEach(function (line) {
@@ -139,6 +138,7 @@ function doWhatItSays() {
         executeCommand(command, argument);
     });
 }
+
 function reportUnrecognizedCommand() {
     console.log("Unrecognized Command!!!!");
 }
